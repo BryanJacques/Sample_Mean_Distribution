@@ -69,3 +69,23 @@ plot_2 <- plot_dist(20,200)
 plot_3 <- plot_dist(20,10000)
 
 grid.arrange(plot_1, plot_2, plot_3, ncol=1)
+
+
+# reimport hole_scores to demonstrate MLR fit as some fields needed were removed
+# above
+# ------------------------------------------------------------------------------
+hole_scores <- read_csv(here("Hole_Scores.csv"))
+round_course_map <- read_excel(here("Round_Course_Map.xlsx"))
+course_hole_map <- read_excel(here("Course_Hole_Map.xlsx"))
+
+
+hole_scores <- hole_scores %>% 
+  left_join(round_course_map, by = c("tournament_short","round")) %>% 
+  left_join(course_hole_map, by = c("course","hole")) %>% 
+  mutate(par_score = score_val - par, distance_100 = distance / 100)
+
+
+# fit MLR
+# ------------------------------------------------------------------------------
+model <- lm(score_val ~ distance_100 + par, data = hole_scores)
+summary(model)
